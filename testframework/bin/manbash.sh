@@ -1,3 +1,7 @@
+######################################################
+# Utilities for testframework
+#
+
 function manbashpage () {
 	less <<-EOF
 Export Variables

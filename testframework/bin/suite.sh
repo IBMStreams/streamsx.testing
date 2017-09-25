@@ -2,7 +2,7 @@
 
 ######################################################
 # Test suite 
-# Script is to be used with testframework.sh
+# Testframework Test Suite execution script
 ######################################################
 
 #some setup to be save
@@ -214,6 +214,7 @@ isVerbose && echo "$executedTestPrepSteps Test Suite Preparation steps executed"
 
 #-------------------------------------------------
 #test case execution
+#TODO: evaluate timeout properly
 unset x
 if [[ $TTRO_noParallelCases -eq 1 ]]; then
 	declare -ri maxParralelJobs=1

@@ -1,5 +1,5 @@
 #####################################################
-# Utilities for the main propertiesgram
+# Utilities for the main testframework script
 #####################################################
 
 #

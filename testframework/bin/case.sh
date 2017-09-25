@@ -2,7 +2,7 @@
 
 ######################################################
 # Test case
-# Script is to be used with testframework.sh from suite.sh
+# Testframework Test Case execution script
 ######################################################
 
 #some setup to be save

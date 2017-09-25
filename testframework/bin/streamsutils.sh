@@ -1,4 +1,7 @@
-#########################################################
+#########################################
+# Streams utilities for testframework
+
+####################################################
 # Initializatio section
 
 TTRO_help_streamsutilsInitialization='

@@ -19,6 +19,9 @@ Whats new:
 Version 0.2.0:
 - Dummy Suite support: Test cases can be defined without suite context.
 - Test collection now requires a TestCollection.sh file and the TestProperties file is now optional
-- Intstaller
+- Installer
 - New global initialization in streamsutils
 - Use variables for sab file main composite ..
+- New test cases
+- Streams sample
+

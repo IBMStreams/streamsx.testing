@@ -168,6 +168,7 @@ function splitVarValue {
 # exits with ${errRt} if an invalid line was read;
 # results are returned in global variables variantCount; variantList
 function readVariantFile {
+	#TODO: the variables variantCount, variantList, TT_timeout and TT_extraTime are always treated as literal. Should be improved
 	isDebug && printDebug "$FUNCNAME $1"
 	if [[ ! -r $1 ]]; then
 		printErrorAndExit "${FUNCNAME} : Can not open file=$1 for read" ${errRt}
