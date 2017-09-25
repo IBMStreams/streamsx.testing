@@ -96,32 +96,34 @@ isVerbose && echo "**** START Case $TTRO_case variant $TTRO_caseVariant in workd
 setProperties "${TTRO_inputDirCase}/${TEST_CASE_FILE}"
 fixPropsVars
 
-#-----------------------------------
-#include tool definitions
-tmp="$TTRO_inputDir/$TEST_TOOLS_FILE"
+#-------------------------------------------------
+#include global, suite and case custom definitions
+tmp="$TTRO_inputDir/$TEST_COLLECTION_FILE"
 if [[ -r $tmp ]]; then
 	isVerbose && echo "Include global test tools $tmp"
 	source "$tmp"
 else
-	isVerbose && echo "No global test tools file ${tmp} defined"
+	printErrorAndExit "Can nor read test collection file ${tmp}" $errScript
 fi
-for x in $TTRO_tools; do
-	isVerbose && echo "Source global tools file: $x"
-	source "$x"
-done
-tmp="${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
-if [[ -e $tmp ]]; then
-	isVerbose && echo  "Source Suite test tools file $tmp"
-	source "$tmp"
-else
-	printErrorAndExit "No Suite test tools file $tmp" $errRt
+#for x in $TTRO_tools; do
+#	isVerbose && echo "Source global tools file: $x"
+#	source "$x"
+#done
+if [[ $TTRO_suite != '--' ]]; then
+	tmp="${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
+	if [[ -e $tmp ]]; then
+		isVerbose && echo  "Source Suite test tools file $tmp"
+		source "$tmp"
+	else
+		printErrorAndExit "No Suite test tools file $tmp" $errScript
+	fi
 fi
 tmp="${TTRO_inputDirCase}/${TEST_CASE_FILE}"
 if [[ -e $tmp ]]; then
 	isVerbose && echo  "Source Case test tools file $tmp"
 	source "$tmp"
 else
-	printErrorAndExit "No Case test tools file $tmp" $errRt
+	printErrorAndExit "No Case test tools file $tmp" $errScript
 fi
 
 #----------------------------------

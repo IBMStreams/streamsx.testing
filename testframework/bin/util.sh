@@ -359,7 +359,9 @@ function fixPropsVars {
 	done
 	for var in "${!TTPN_@}"; do
 		isDebug && printDebug "${FUNCNAME} : TTPN_ $var=${!var}"
-		readonly "${var}"
+		if [[ -n "${!var}" ]]; then
+			readonly "${var}"
+		fi
 		export "${var}"
 	done
 }
@@ -396,15 +398,15 @@ function setVar {
 				fi
 				readonly ${1}
 			else
-				isVerbose && echo "$FUNCNAME ignore value for ${1} in file=$1 line=$lineno"
+				isVerbose && echo "$FUNCNAME ignore value for ${1}"
 			fi
 		;;
 		TTRO_* )
 			#set a global readonly variable
-			if ! eval export \'${1}\'='"${2}"'; then
-				printErrorAndExit "${FUNCNAME} : Invalid expansion varname=${1} value=${2}" ${errRt}
-			else
+			if eval export \'${1}\'='"${2}"'; then
 				isVerbose && echo "${FUNCNAME} : ${1}='${!1}'"
+			else
+				printErrorAndExit "${FUNCNAME} : Invalid expansion varname=${1} value=${2}" ${errRt}
 			fi
 			readonly ${1}
 		;;
@@ -443,13 +445,35 @@ TTRO_help_isNotExisting='
 #	check if variable not exists
 #	$1 var name to be checked'
 function isNotExisting {
-	if declare -p "${1}" ; then
+	if declare -p "${1}" &> /dev/null; then
 		isDebug && printDebug "$FUNCNAME $1 return 1"
 		return 1
 	else
 		isDebug && printDebug "$FUNCNAME $1 return 0"
 		return 0
 	fi
+}
+
+TTRO_help_arrayHasKey='
+# Function arrayHasKey
+#	check is an associative array has key
+#	$1 the array name
+#	$2 the key value
+#	returns true if key exists in array'
+function arrayHasKey {
+	if [[ $# -ne 2 ]]; then printErrorAndExit "$FUNCNAME must have 2 aruments" $errRt; fi
+	isDebug && printDebug "$FUNCNAME $1 $2"
+	eval "keys=\"\${!$1[@]}\"" #indirect array access with eval
+	local in=1
+	local key
+	for key in $keys; do
+		if [[ $key == $2 ]]; then
+			in=0
+			break
+		fi
+	done
+	isDebug && printDebug "$FUNCNAME $1 return $in"
+	return $in
 }
 
 TTRO_help_copyAndTransform='
@@ -682,6 +706,24 @@ function echoAndExecute {
 	echo "${FUNCNAME[1]}: $*"
 	eval echo "${FUNCNAME[1]}: $*"
 	eval "$*"
+}
+
+TTRO_help_renameInSubdirs='
+# Function renameInSubdirs
+#	Renames a special file name in all base directory and in all sub directories
+#	$1 the base directory
+#	$2 the source filename
+#	$3 the destination filename'
+function renameInSubdirs {
+	if [[ $# -ne 3 ]]; then printErrorAndExit "$FUNCNAME invalid no of params. Number of Params is $#" $errRt; fi
+	isDebug && printDebug "$FUNCNAME $*"
+	local x mdir destf
+	for x in $1/**/$2; do
+		mdir="${x%/*}"
+		destf="${mdir}/$3"
+		mv -v "$x" "$destf"
+	done
+	return 0
 }
 
 #Guard for the last statement because source testutils will fail if TTPN_debug is not set ??

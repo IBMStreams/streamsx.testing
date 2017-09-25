@@ -37,10 +37,13 @@ function usage {
 	--bashhelp               : Print some hints for the use of bash
 	
 	
-	case                     : The list of the testcases to execute. Each pattern must be composed in the form Suite:Case.
+	case                     : The list of the testcases to execute. Each pattern must be composed in the form Suite::Case.
+	                           For cases without Suite context use the form ::Case. Quoting * and ? characters.
+	                           The matching cases are unconditionally executed. The skip attributes are ignored irrespective of the 
+	                           --skip-ignore parameter.
 	                           Where Suite and case are a pattern (like file glob)
-	                           If the case list is omitted, all test suites/cases found in input directory (without
-	                           a skipped property) are executed
+	                           If the case list is omitted, all test suites/cases found in input directory are executed and the --skip-ignore
+	                           parameter is evaluated.
 	
 	Return Status:
 	0     : Test Success
@@ -87,6 +90,7 @@ function searchSuites {
 	local suite=""
 	local myPath=""
 	local x
+	isDebug && printDebug "******* $FUNCNAME in directory ${directory}"
 	for x in ${directory}/**/$TEST_SUITE_FILE; do
 		if [[ -f $x || -h $x ]]; then # recognize links to
 			isDebug && printDebug "Found Suite properties file ${x}"
@@ -110,12 +114,13 @@ function searchSuites {
 # Use global caseMap
 function checkSuiteList {
 	local n1 n2 i j
+	isDebug && printDebug "******* $FUNCNAME"
 	for i in ${!caseMap[@]}; do
 		for j in ${!caseMap[@]}; do
 			#skip same entries
 			if [ $i != $j ]; then
 				#check for nested suites
-				if [[ ${i} == ${j} ]]; then
+				if [[ ( ${i} == ${j}* ) || ( ${j} == ${i}* ) ]]; then
 					printErrorAndExit "Nested suites found\n$i\n$j\nSuites must not be nested" ${errRt}
 				fi
 				#check for equal names
@@ -138,22 +143,48 @@ function searchCases {
 	local case="" casePath=""
 	local -i noCases=0
 	local myPath x tmp n1 n2 i j
-	for myPath in ${!caseMap[@]}; do
+	local suite allSuites insertCase
+	local allRegularCases=''
+	isDebug && printDebug "******* $FUNCNAME"
+	allSuites="${!caseMap[@]} $TTRO_inputDir" # add dummy suite as last element
+	for myPath in $allSuites; do
+		if [[ $myPath == $TTRO_inputDir ]]; then
+			suite='--'
+			caseMap[$myPath]='' #add dummy suite
+		else
+			suite="${myPath##*/}"
+		fi
+		isDebug && printDebug "search in suite: $suite $myPath"
 		noCases=0
 		for x in ${myPath}/**/$TEST_CASE_FILE; do
 			if [[ -f $x || -h $x ]]; then # recognize also links to
-				isDebug && printDebug "Found test case properprintDebugties file ${x}"
-				case=""; casePath="";
+				isDebug && printDebug "Found test case file ${x}"
+				case=""
 				casePath="${x%/$TEST_CASE_FILE}"
-				case="${casePath##*/}"
 				isDebug && printDebug "Found case $case"
 				if [[ $x == *\ * ]]; then
 					"Invald path : $x\nPathes must not contain spaces." ${errRt}
 				fi
-				#put case into caseMap
-				tmp="${caseMap["$myPath"]} ${casePath}"
-				caseMap["$myPath"]="${tmp}"
-				noCases=$(( noCases+1 ))
+				case="${casePath##*/}"
+				insertCase='true'
+				if [[ $suite != '--' ]]; then
+					allRegularCases="$allRegularCases $x"
+				else
+					##remove already found cases in regular suites from dummy suite
+					for i in $allRegularCases; do
+						if [[ $x == $i* ]]; then
+							isDebug && printDebug "Dummy suite case $x is already recognized in sute/case $i"
+							insertCase=''
+							break
+						fi
+					done
+				fi
+				if [[ -n $insertCase ]]; then
+					#put case into caseMap
+					tmp="${caseMap["$myPath"]} ${casePath}"
+					caseMap["$myPath"]="${tmp}"
+					noCases=$(( noCases+1 ))
+				fi
 			fi
 		done
 		isDebug && printDebug "$noCases test cases found in $myPath"
@@ -164,6 +195,7 @@ function searchCases {
 				#skip same entries
 				if [ "$i" != "$j" ]; then
 					#check for nested cases
+					isDebug && printDebug "check for nested cases $i $j"
 					if [[ ${i} == ${j} ]]; then
 						printErrorAndExit "Nested case found\n$i\n$j\nTest cases must not be nested" ${errRt}
 					fi
@@ -180,44 +212,46 @@ function searchCases {
 }
 
 #
-# Sort cases alphabetical
-# Use global sortedSuites
-# Use global executionList
-# Use global noCases
+# Sort cases alphabetical and determine the final execution list
+# Use global sortedSuites as input for suites (array)
+# Use caseMap input map with cases found in file  system
+# Use global cases the as input for case pattern (array)
+# Use global executionList as output for found test cases to be executed
+# Use global usedCaseIndexList the indexes of used cases forom cases array
+# Use global noCases the number of found cases
 function sortCases {
 	local myPath suite x casePath case tmpx tmp
-	local -i i
+	local -i i j
 	for ((i=0; i<${#sortedSuites[@]}; i++)); do
 		myPath="${sortedSuites[$i]}"
-		isDebug && printDebug "***********\ntake suite=${myPath}"
-		suite=${myPath##*/}
+		isDebug && printDebug "*********** take suite=${myPath}"
+		if [[ $myPath == $TTRO_inputDir ]]; then
+			suite=''
+		else
+			suite=${myPath##*/}
+		fi
 		executionList["$myPath"]=""
-		shadowList["$myPath"]=""
 		declare -a sortedCases=$( { for x in ${caseMap["$myPath"]}; do echo "$x"; done } | sort )
 		isDebug && printDebug "sortedCases=\n$sortedCases\n**********"
 		for casePath in ${sortedCases}; do
 			case=${casePath##*/}
-			isDebug && printDebug "take case=${case}"
+			isDebug && printDebug "check if case=${case} matches"
 			if [[ -n "$takeAllCases" ]]; then
 				isDebug && printDebug "direct insert case=${case} into execution list"
 				executionList["$myPath"]+=" ${casePath}"
-				shadowList["$myPath"]+=" ${casePath}"
 				noCases=$((noCases+1))
 			else
-				# lookup if cases are in input list
+				# lookup if case matches one pattern from parameter list
 				tmpx="${!cases[@]}"
-				for x in ${tmpx}; do
-					tmp="${suite}:${case}"
+				for ((j=0; j<${#cases[@]}; j++)); do
+					tmp="${suite}::${case}"
 					isDebug && printDebug "tmp='$tmp'"
-					isDebug && printDebug "case='${cases[$x]}'"
-					shadowList["$myPath"]+=" ${casePath}"
-					if [[ $tmp == ${cases[$x]} ]]; then
+					isDebug && printDebug "case='${cases[$j]}'"
+					if [[ $tmp == ${cases[$j]} ]]; then
 						isDebug && printDebug "conditional insert case=${case} into execution list"
 						executionList["$myPath"]+=" ${casePath}"
 						noCases=$((noCases+1))
-						isDebug && printDebug "unset cases[$x]"
-						#unset cases[$x]  unset does not work here ??
-						cases["$x"]=""
+						usedCaseIndexList=" $j"
 					fi
 				done
 			fi
@@ -227,16 +261,20 @@ function sortCases {
 }
 
 #
-# function to execute the varians of suites
+# function to execute the variants of suites
 # $1 is the variant
 # $2 is the suite variant workdir
 # $3 execute empty suites
+# expect set vars suitePath suite sworkdir directory
 function exeSuite {
-	if [[ ${executionList[$suitePath]} == "" && -z $3 ]]; then
+	#skip suites with no test cases if $3 is false / empty dummy suite is skipped any way
+	if [[ ( ${executionList[$suitePath]} == "" ) && ( ( -z $3 ) || ( $suite == '--' ) ) ]]; then
 		isDebug && printDebug "$FUNCNAME: skip empty suite $suitePath: variant='$1'"
 		return 0
 	fi
-	suiteVariants=$((suiteVariants+1))
+	if [[ $suite != '--' ]]; then
+		suiteVariants=$((suiteVariants+1))
+	fi
 	echo "**** START Suite: ${suite} variant='$1' in ${suitePath} *****************"
 	#make and cleanup suite work dir
 	local sworkdir="$2"
@@ -247,7 +285,7 @@ function exeSuite {
 
 	#execute suite variant
 	local result=0
-	if "${TTRO_scriptDir}/suite.sh" "${suitePath}" "${sworkdir}" "$1" ${executionList[$suitePath]} 2>&1 | tee -i "${sworkdir}/${TEST_LOG}"; then
+	if "${TTRO_scriptDir}/suite.sh" "$suite" "${suitePath}" "${sworkdir}" "$1" ${executionList[$suitePath]} 2>&1 | tee -i "${sworkdir}/${TEST_LOG}"; then
 		result=0;
 	else
 		result=$?

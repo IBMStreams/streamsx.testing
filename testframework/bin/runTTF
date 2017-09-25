@@ -17,14 +17,13 @@ declare -r currentDir=$(pwd)
 
 #------------------------------------------------------
 #get the scripts path and write it into scriptsDir
-tmp="${0%/*}"
-cd "$tmp"
-declare -r TTRO_scriptDir=$(pwd)
-cd "${currentDir}"
+declare -r realCommand=$(realpath "$0")
+declare -r commandname="${realCommand##*/}"
+declare -r TTRO_scriptDir="${realCommand%/*}"
 
 #---------------------------------------------------
 #include the utils define the preliminary trace vars
-declare -xr TTRO_version="0.1"
+source "${TTRO_scriptDir}/version.sh"
 declare -x TTPN_debug=""
 declare -x TTPN_debugDisable=""
 declare -x TTPN_verbose=""
@@ -33,7 +32,6 @@ declare -x TTPN_verboseDisable=""
 #-----------------------------------------------------
 # Shutdown and interrut vars and functions
 declare interruptReceived=""
-declare -r commandname="${0##*/}"
 
 # Function interruptSignalMain
 function interruptSignalMain {
@@ -61,7 +59,7 @@ function errorExit {
 }
 
 trap errorExit ERR
-trap -p
+#trap -p
 
 #-----------------------------------------------------
 #include the definitions
@@ -151,10 +149,10 @@ while [[ $# -ge 1 ]]; do
 		[[ -z $parametersection ]] || optionInParamSection $1
 		echo "$TTRO_version"
 		exit 0;;
-	-t|--tools)
-		[[ $# -ge 2 && $2 != -* ]] || missOptionArg $1;
-		toolsFiles="$toolsFiles $2"
-		shift;;
+#	-t|--tools)
+#		[[ $# -ge 2 && $2 != -* ]] || missOptionArg $1;
+#		toolsFiles="$toolsFiles $2"
+#		shift;;
 	-D)
 		[[ $# -ge 2 && $2 != -* ]] || missOptionArg $1;
 		vname=${2%%=*}
@@ -204,11 +202,11 @@ while [[ $# -ge 1 ]]; do
 	;;
 	* )
 		parametersection="true"
-		if [[ $1 == *?:?* ]]; then
+		if [[ $1 == *::?* ]]; then
 			n=${#cases[*]}
 			cases[$n]="$1"
 		else
-			printErrorAndExit "Invalid format of test case '$1'.\nTest cases must be in the form suite:case" ${errInvocation}
+			printErrorAndExit "Invalid format of test case '$1'.\nTest cases must be in the form suite::case or ::case" ${errInvocation}
 		fi
 	;;
 	esac
@@ -263,26 +261,25 @@ else
 fi
 
 #-------------------------------------
-#properties file
-if [[ -z  ${properties} ]]; then
-	properties="$TEST_PROPERTIES"
-fi
-if [[ "${properties:1:1}" != "/" ]]; then
-	properties=${directory}/${properties}
+#properties file : if no path element is given use the input dir as prefix
+if [[ -n  ${properties} ]]; then
+	if [[ ( ${properties:1:1} != "/" ) && (${properties:1:1} != \. ) ]]; then
+		properties=${directory}/${properties}
+	fi
 fi
 
 #-------------------------------------
 #tools file
-if ! declare -p TTRO_tools &> /dev/null; then
-	declare TTRO_tools=""
-fi
-for x in ${toolsFiles}; do
-	tmp="$x"
-	if [[ "${tmp:1:1}" != "/" ]]; then
-		tmp=${currentDir}/${tmp}
-	fi
-	TTRO_tools="$TTRO_tools $tmp"
-done
+#if ! declare -p TTRO_tools &> /dev/null; then
+#	declare TTRO_tools=""
+#fi
+#for x in ${toolsFiles}; do
+#	tmp="$x"
+#	if [[ "${tmp:1:1}" != "/" ]]; then
+#		tmp=${currentDir}/${tmp}
+#	fi
+#	TTRO_tools="$TTRO_tools $tmp"
+#done
 
 #----------------------------------
 #finally make option variables read only
@@ -324,19 +321,48 @@ fixPropsVars
 printParams
 
 #-----------------------------------------------------------------------------------------
+# Check test collection files and properies file if properties parameter was given
+tmp="$TTRO_inputDir/$TEST_COLLECTION_FILE"
+if [[ -r "$tmp" ]]; then
+	isVerbose && echo "Found radable test collection file $tmp"
+else
+	printErrorAndExit "No test collection file $tmp found" $errRt
+fi
+if [[ -n "$properties" ]]; then
+	if [[ -r "$properties" ]]; then
+		isVerbose && echo "Found radable test properties file $properties"
+	else
+		printErrorAndExit "No test properties file $properties found"
+	fi
+fi
+
+#-----------------------------------------------------------------------------------------
 # search test suites. Suites are directories with a suite definition file $TEST_SUITE_FILE
 declare -A caseMap=() # The case map; key is the suite path; value is the case path list (space separated)
 declare -i noSuites=0 # the global number of suites
 if [[ -z $TTRO_reference ]]; then
 	searchSuites
+	if arrayHasKey "caseMap" "$TTRO_inputDir"; then
+		printErrorAndExit "No $TEST_SUITE_FILE allowed in input dir $TTRO_inputDir" $errRt
+	fi
+#	isDebug && printDebug "Enter Dummy Suite ${TTRO_inputDir}"
+#	caseMap["$TTRO_inputDir"]=''	#enter dummy suite
+#	noSuites=$((noSuites+1))
 fi
 isDebug && printDebug "$noSuites suites found"
 checkSuiteList # check nested suite and duplicate test suite names. This is considered an error
 # print suites
 if isDebug; then
-	printDebug "******************* TestSuites found *******************"
+	printDebug "******************* test suites found *******************"
 	for x in ${!caseMap[@]}; do
-		tmp=${x##*/}
+		if [[ $TTRO_inputDir == $x ]]; then
+			tmp='--'
+		else
+			tmp=${x##*/}
+			if [[ $tmp == '--' ]]; then
+				printErrorAndExit "Suite must not have name '--'" $errRt
+			fi
+		fi
 		printDebug "${tmp}\t\t${x}"
 	done
 fi
@@ -348,8 +374,12 @@ searchCases
 if isDebug; then
 	printDebug "******************* test cases found *******************"
 	for x in ${!caseMap[@]}; do
-		printDebug "Suite: $x"
-		printDebug "all cases: ${caseMap["$x"]}"
+		if [[ $TTRO_inputDir == $x ]]; then
+			tmp='--'
+		else
+			tmp=${x##*/}
+		fi
+		printDebug "Suite: $tmp"
 		for y in ${caseMap["$x"]}; do
 			printDebug "$y"
 		done
@@ -359,7 +389,7 @@ fi
 #------------------------------------------
 #The final list with test cases to execute
 declare -A executionList=() # the cases to execute
-declare -A shadowList=() # the list with the found cases
+declare    usedCaseIndexList='' # the list with the found cases
 declare -i noCases=0
 declare -a sortedSuites=()
 #if the command line has no case list, all found cases are executed
@@ -382,8 +412,11 @@ fi
 isDebug && printDebug "****************** sort suites ***********************"
 tmp=$( { for x in ${!caseMap[@]}; do echo "$x"; done } | sort )
 
+sortedSuites+=( "${TTRO_inputDir}" ) # add dummy suite
 for x in $tmp; do
-	sortedSuites+=( "${x}" )
+	if [[ $x != $TTRO_inputDir ]]; then
+		sortedSuites+=( "${x}" )
+	fi
 done
 if isDebug; then
 	printDebug "Sorted suites count=${#sortedSuites[@]}"
@@ -399,14 +432,15 @@ sortCases
 #--------------------------------------------------
 #check whether cases from input list are not found
 for x in ${!cases[@]}; do
-	if [[ -n ${cases[$x]} ]]; then
+	patternMatchWasFound=''
+	for y in $usedCaseIndexList; do
+		if [[ $x == $y ]]; then
+			patternMatchWasFound='true'
+			break
+		fi
+	done
+	if [[ -z $patternMatchWasFound ]]; then
 		printWarning "Case ${cases[$x]} from parameter list was not found in input directory ${directory}"
-		echo "Suites and cases found: ***"
-		for ((i=0; i<${#sortedSuites[@]}; i++)); do
-			tmp="${sortedSuites[$i]}"
-			echo "Suite: $tmp"
-			echo "       ${shadowList[$tmp]}"
-		done
 	fi
 done
 
@@ -417,12 +451,18 @@ readonly noCases executionList sortedSuites
 #--------------------------------------------------
 # print final execution list
 if isVerbose; then
-	echo "**** Collected Cases Summary ${noCases} test cases to execute ****"
+	echo "**** Collected Cases Summary: ${noCases} test cases to execute ****"
 	for ((i=0; i<${#sortedSuites[@]}; i++)); do
-		suite="${sortedSuites[$i]}"
-		echo "---- Suite: $suite ----"
-		for casePath in ${executionList[$suite]}; do
-			echo -e "Case:\t\t\t${casePath}"
+		suitePath="${sortedSuites[$i]}"
+		if [[ $suitePath == $TTRO_inputDir ]]; then
+			suite='--'
+		else
+			suite=${suitePath##*/}
+		fi
+		echo "Suite: $suite path=$suitePath ----"
+		for casePath in ${executionList[$suitePath]}; do
+			case=${casePath##*/}
+			echo -e "\tCase: $case path=${casePath}"
 		 done
 	done
 	echo "********************************************************"
@@ -463,41 +503,40 @@ echo "TTRO_workDir=$TTRO_workDir"
 #{
 #-----------------------------------------------------------
 #check if properties file exists - read properties and fixup
-if [[ -r $properties ]]; then
+if [[ -n $properties ]]; then
 	isVerbose && echo "Include global properties $properties"
 	setProperties "${properties}"
+elif [[ -e "$TTRO_inputDir/$TEST_PROPERTIES" ]]; then
+	isVerbose && echo "Include global properties $TTRO_inputDir/$TEST_PROPERTIES"
+	setProperties "$TTRO_inputDir/$TEST_PROPERTIES"
 else
-	printErrorAndExit "Can not read properties file ${properties}" $errRt
+	isVerbose && echo "No global properies file to evaluate"
 fi
 fixPropsVars # fix global properties and vars
 
 #--------------------------------------
 # Global includes
-tmp="$TTRO_inputDir/$TEST_TOOLS_FILE"
-if [[ -r $tmp ]]; then
-	isVerbose && echo "Include global test tools $tmp"
-	setProperties "${tmp}"
-	fixPropsVars
-	source "$tmp"
-else
-	isVerbose && echo "No global test tools file ${tmp} defined"
-fi
+tmp="$TTRO_inputDir/$TEST_COLLECTION_FILE"
+isVerbose && echo "Include global test tools $tmp"
+setProperties "${tmp}"
+fixPropsVars
+source "$tmp"
 fixPropsVars # fix global properties and vars
-if [[ -n $TTRO_tools ]]; then
-	for x in $TTRO_tools; do
-		isVerbose && echo "Source global tools file: $x"
-		if [[ -r $x ]]; then
-			setProperties "$x"
-			fixPropsVars # fix global properties and vars
-			source "$x"
-		else
-			printErrorAndExit "Tools file $x is required but this file is not readable" $errRt
-		fi
-	done
-else
-	isDebug && printDebug "No additional global test tools files defined"
-fi
-fixPropsVars # fix global properties and var
+#if [[ -n $TTRO_tools ]]; then
+#	for x in $TTRO_tools; do
+#		isVerbose && echo "Source global tools file: $x"
+#		if [[ -r $x ]]; then
+#			setProperties "$x"
+#			fixPropsVars # fix global properties and vars
+#			source "$x"
+#		else
+#			printErrorAndExit "Tools file $x is required but this file is not readable" $errRt
+#		fi
+#	done
+#else
+#	isDebug && printDebug "No additional global test tools files defined"
+#fi
+#fixPropsVars # fix global properties and var
 
 #------------------------------------------------
 # enter working dir
@@ -560,13 +599,20 @@ declare -i suiteVariants=0
 declare -i i j
 for ((i=0; i<${#sortedSuites[@]}; i++)); do
 	suitePath="${sortedSuites[$i]}"
-	suite="${suitePath##*/}"
+	if [[ $suitePath == $TTRO_inputDir ]]; then
+		suite='--'
+	else
+		suite="${suitePath##*/}"
+	fi
 	if [[ -n $interruptReceived ]]; then
 		echo "SIGINT: end Suites loop"
 		break
 	fi
 	isVerbose && echo "**** START Suite: $suite ************************************"
-	readVariantFile "${suitePath}/${TEST_SUITE_FILE}" "suite"
+	variantCount=""; variantList=""; splitter=""
+	if [[ $suite != '--' ]]; then
+		readVariantFile "${suitePath}/${TEST_SUITE_FILE}" "suite"
+	fi
 	if [[ -z $variantCount ]]; then
 		if [[ -z $variantList ]]; then
  			exeSuite "" "${TTRO_workDir}/${suite}" "$takeAllCases"

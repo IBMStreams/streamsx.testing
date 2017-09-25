@@ -39,11 +39,10 @@ help test  - shows more
 
 Redirections
 ============
->&2          directs to error out
-
-&>           directs error to stdout
-
-2>&1 | tee ...
+>&2          directs std to error out
+&> file      directs error and stdout to file
+2>&1         directs error to stdout
+2>&1 | tee ... and pipe
 
 Variable Expansion
 ==================

@@ -7,7 +7,8 @@ function manpage () {
 	
 	Test Cases, Test Suites and Test Collections
 	============================================
-	A test case is comprised of a directory with the main test case file with name: '$TEST_CASE_FILE' and other necessary files.
+	A test case is comprised of a directory with the main test case file with name: '$TEST_CASE_FILE' and other necessary artifacts
+	which are necessary for the test execution.
 	The name of a test case is the last component of the path-name of the main test case file.
 	
 	A test suite is a collection of test cases which are organized in a test suite directory. The directory sub tree
@@ -15,12 +16,14 @@ function manpage () {
 	A test suite is defined through a directory with the main suite file with name: '$TEST_SUITE_FILE'
 	The name of a test suite is the last component of the path-name of the main test suite file.
 	
-	One or more test suites form a Test Collection. A test collection must have at the test properties file $TEST_PROPERTIES and at least one test
-	Suite directory. A test Collection may have several Test Tools files with scrip code wihich may be used during test execution.
+	One or more test suites or test cases form a Test Collection. A test collection is defined through a directory with the 
+	test collection file with name: '$TEST_COLLECTION_FILE'.
+	A test collection may have at the test properties file $TEST_PROPERTIES and at least one test
+	Suite directory or a test Case directory. The name of the test properties file may be changed by a comman line parameter (--properties).
 	
 	Test suites must not be nested in other test suites or test cases.
 	Test cases must not be nested in other test case directoreis.
-	All path names of test cases and suites must not contain any white space characters.
+	All path names of test cases and suites must not contain any white space characters. A test Suite must not have the name '--'.
 
 	Execution Environment
 	======================
@@ -77,12 +80,7 @@ function manpage () {
 	
 	Test tools files
 	================
-	The functions which are required for your test are sourced before execution of the test body. These test tools files can be defined at 
-	global testcollection level. The global file must have the name $TEST_TOOLS_FILE and must be placed in the test collection directory.
-	If this file exists it is sourced before test collection execution, test suite execution and test case execution.
-	More global test tools files may be defined as command line option or can be supplied in environment variable TTRO_tools.
-	The test case and test suite file may contain script code for the test case execution.
-
+	If your test collection requires special functions, you can sourced the aproppriate modules from the test collection file. 
 
 	Property Variables
 	==================
@@ -121,7 +119,6 @@ function manpage () {
 
 	Accepted Environment
 	====================
-	TTRO_tools           - An optional list with test tools files which are sourced before execution
 
 	Debug and Verbose
 	=================

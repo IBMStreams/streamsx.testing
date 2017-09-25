@@ -72,18 +72,18 @@ function usage {
 	local command=${0##*/}
 	cat <<-EOF
 	
-	usage: ${command} suitePath suiteWorkdir suiteVariant [case [ case ...]];
+	usage: ${command} suite suitePath suiteWorkdir suiteVariant [case [ case ...]];
 	
 	EOF
 }
 isDebug && printDebug "$0 $*"
-if [[ $# -lt 3 ]]; then
+if [[ $# -lt 4 ]]; then
 	usage
 	exit ${errInvocation}
 fi
 #move all parameters into named variables
+declare -r TTRO_suite="$1"; shift
 declare -r TTRO_inputDirSuite="$1"; shift
-declare -r TTRO_suite="${TTRO_inputDirSuite##*/}"
 declare -r TTRO_workDirSuite="$1"; shift
 declare -r TTRO_suiteVariant="$1"; shift
 declare -a cases=() # case pathes
@@ -98,28 +98,32 @@ isDebug && printDebug "noCases=$noCases"
 
 #-------------------------
 #setup properties and vars
-setProperties "${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
+if [[ $TTRO_suite != '--' ]]; then
+	setProperties "${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
+fi
 fixPropsVars
 
-#------------------------------
-#include custom definitions
-tmp="$TTRO_inputDir/$TEST_TOOLS_FILE"
+#-------------------------------------------
+#include global and suite custom definitions
+tmp="$TTRO_inputDir/$TEST_COLLECTION_FILE"
 if [[ -r $tmp ]]; then
 	isVerbose && echo "Include global test tools $tmp"
 	source "$tmp"
 else
-	isVerbose && echo "No global test tools file ${tmp} defined"
+	printErrorAndExit "Can nor read test collection file ${tmp}" $errScript
 fi
-for x in $TTRO_tools; do
-	isVerbose && echo "Source global tools file: $x"
-	source "$x"
-done
-tmp="${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
-if [[ -e "$tmp" ]]; then
-	isVerbose && echo  "Source Suite test tools file $tmp"
-	source "$tmp"
-else
-	printErrorAndExit "No Suite test tools file $tmp" $errRt
+#for x in $TTRO_tools; do
+#	isVerbose && echo "Source global tools file: $x"
+#	source "$x"
+#done
+if [[ $TTRO_suite != '--' ]]; then
+	tmp="${TTRO_inputDirSuite}/${TEST_SUITE_FILE}"
+	if [[ -e "$tmp" ]]; then
+		isVerbose && echo  "Source Suite test tools file $tmp"
+		source "$tmp"
+	else
+		printErrorAndExit "No Suite test tools file $tmp" $errScript
+	fi
 fi
 
 #--------------------------------------------------
