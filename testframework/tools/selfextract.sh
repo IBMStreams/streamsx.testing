@@ -2,18 +2,59 @@
 
 set -o nounset;
 
+wrongInvocation=''
+if [[ $# -eq 0 ]]; then
+	interactive='true'
+	help=''
+elif [[ $# -eq 1 ]]; then
+	if [[ $1 == '-h' || $1 == '--help' ]]; then
+		interactive='true'
+		help='true'
+	else
+		interactive=''
+		help=''
+	fi
+else
+	interactive='true'
+	help='true'
+	wrongInvocation='true'
+fi
+
+if [[ -n $help ]]; then
+	myCommand=${0##*/}
+	echo
+	echo "Usage: $myCommand [ <install_dir>  | -h | --help ]"
+	echo
+	echo "Install Streams Toolkits Testframework Tool runTT"
+	echo
+	echo "If no command line parameter is specified the installation"
+	echo "is done interactive"
+	echo "If command line parameter <install_dir> is specified, the instalation starts standalone"
+	echo "If command line parameter -h|--help is specified, this message is print"
+	echo
+	if [[ -n $wrongInvocation ]]; then
+		exit 1
+	else
+		exit 0
+	fi
+fi
+
 echo "**************************************************"
 echo "Install Streams Toolkits Testframework Tool runTTF"
 echo "**************************************************"
 
-DEFAULTINSTALLDIR='runTTF'
-
-installUser=$(whoami)
-if [[ $installUser == 'root' ]]; then
-	destination="/opt/$DEFAULTINSTALLDIR"
+if [[ -n $interactive ]]; then
+	DEFAULTINSTALLDIR='runTTF'
+	installUser=$(whoami)
+	if [[ $installUser == 'root' ]]; then
+		destination="/opt/$DEFAULTINSTALLDIR"
+	else
+		destination="$HOME/$DEFAULTINSTALLDIR"
+	fi
 else
-	destination="$HOME/$DEFAULTINSTALLDIR"
+	destination="$1"
 fi
+
 #Get version information from own filename
 declare -r commandname="${0##*/}"
 declare version=''
@@ -32,24 +73,26 @@ else
 	exit 1
 fi
 
-while read -p "Install into directory $destination. (yes/no/exit) [y/n/e]"; do
-	if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
-		break
-	elif [[ $REPLY == "n" || $REPLY == "N" || $REPLY == "no" ]]; then
-		read -p "Enter installation directory:"
-		destination="$REPLY"
-	elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
-		exit 2
-	fi
-done
+if [[ -n $interactive ]]; then
+	while read -p "Install into directory $destination. (yes/no/exit) [y/n/e]"; do
+		if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
+			break
+		elif [[ $REPLY == "n" || $REPLY == "N" || $REPLY == "no" ]]; then
+			read -p "Enter installation directory:"
+			destination="$REPLY"
+		elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
+			exit 2
+		fi
+	done
 
-while read -p "Install into directory $destination is this correct? (yes/exit) [y/e]"; do
-	if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
-		break
-	elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
-		exit 2
-	fi
-done
+	while read -p "Install into directory $destination is this correct? (yes/exit) [y/e]"; do
+		if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
+			break
+		elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
+			exit 2
+		fi
+	done
+fi
 
 versiondir="v$major.$minor"
 bindir="${destination}/bin/${versiondir}"
@@ -57,13 +100,15 @@ sampledir="${destination}/samples/${versiondir}"
 tempdir="${destination}/tmp/${versiondir}"
 
 if [[ -d ${bindir} ]]; then
-	while read -p "The version already exists in $bindir overwite? (yes/exit) [y/e]"; do
-		if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
-			break
-		elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
-			exit 2
-		fi
-	done
+	if [[ -n $interactive ]]; then
+		while read -p "The version already exists in $bindir overwite? (yes/exit) [y/e]"; do
+			if [[ $REPLY == "y" || $REPLY == "Y" || $REPLY == "yes" ]]; then
+				break
+			elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
+				exit 2
+			fi
+		done
+	fi
 	rm -rf "${bindir}"
 	rm -rf "$sampledir"
 fi
