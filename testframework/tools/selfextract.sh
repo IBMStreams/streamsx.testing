@@ -79,7 +79,7 @@ if [[ -n $interactive ]]; then
 			break
 		elif [[ $REPLY == "n" || $REPLY == "N" || $REPLY == "no" ]]; then
 			read -p "Enter installation directory:"
-			destination="$REPLY"
+			eval destination="$REPLY"
 		elif [[ $REPLY == "e" || $REPLY == "E" || $REPLY == "exit" ]]; then
 			exit 2
 		fi
