@@ -2,4 +2,4 @@
 # Self test properies
 ############################################
 
-#--TTPN_sourceDir=$HOME/testframe/bin
+#--TTPN_sourceDir=$TTRO_scriptDir
