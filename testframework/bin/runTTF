@@ -17,9 +17,18 @@ declare -r currentDir=$(pwd)
 
 #------------------------------------------------------
 #get the scripts path and write it into scriptsDir
-declare -r realCommand=$(realpath "$0")
-declare -r commandname="${realCommand##*/}"
-declare -r TTRO_scriptDir="${realCommand%/*}"
+#realpath is not available in rhel6
+if [[ -h $0 ]]; then
+	declare -r realCommand=$(readlink -e "$0")
+	declare -r commandname="${realCommand##*/}"
+	declare -r TTRO_scriptDir="${realCommand%/*}"
+else
+	tmp="${0%/*}"
+	cd "$tmp"
+	declare -r TTRO_scriptDir=$(pwd)
+	cd "${currentDir}"
+	declare -r commandname="${0##*/}"
+fi
 
 #---------------------------------------------------
 #include the utils define the preliminary trace vars
