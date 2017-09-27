@@ -46,7 +46,7 @@ Redirections
 >&2          directs std to error out
 &> file      directs error and stdout to file
 2>&1         directs error to stdout
-2>&1 | tee ... and pipe
+2>&1 | tee ...
 
 Variable Expansion
 ==================

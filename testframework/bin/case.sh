@@ -175,9 +175,13 @@ isVerbose && echo "$executedTestPrepSteps Case Test Preparation steps executed"
 declare errorOccurred=""
 declare failureOccurred=''
 if isExisting 'TTRO_caseStep'; then
+	echo "TTRO_caseStep=$TTRO_caseStep"
 	for x in $TTRO_caseStep; do
+		echo "x=$x"
 		isVerbose && echo "Execute Case Test Step: $x"
 		executedTestSteps=$((executedTestSteps+1))
+		#result=0
+		#eval "${x}"
 		if eval "${x}"; then result=0; else result=$?; fi
 		if [[ $result -eq $errTestFail ]]; then
 			printError "Execution of Case Test: ${x} failed with return code=$result"
