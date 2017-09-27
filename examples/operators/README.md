@@ -29,8 +29,8 @@ In this example, the SPL test composite is stored in **com.ibm.streamsx.testing.
 To test the operator, we need to invoke the SPL Test composite.  Invocation of the SPL Test composite means the following:
 
 * Use Java / Python application to create a topology 
-* In this topology, invoke the SPL composite
-* Get ther resulting stream from the test composite
+* In this topology, invoke the SPL Test Composite
+* Get ther resulting stream from the SPL Test Composite
 * Validate that the resulting stream contains the right data
 * Submit the topology as standlone or distributed
 
