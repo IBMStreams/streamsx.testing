@@ -23,7 +23,7 @@ import com.ibm.streamsx.topology.tester.Tester;
  * This class hows how one can test a SPL composite operator using JUnit
  * and the Streams Java Application API.
  */
-public class TestCustom {
+public class TestMultiplyBy {
 	
 	/*
 	 * Method to create the topology, submit the application based on 

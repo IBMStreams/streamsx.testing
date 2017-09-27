@@ -6,8 +6,8 @@ import streamsx.spl.op as op
 import streamsx.spl.toolkit as tk
 import numpy as np
 
-# TestCustomStandalone class for driving the test in standalone mode
-class TestCustomStandalone(unittest.TestCase):
+class TestMultiplyByStandalone(unittest.TestCase):
+    """TestCustomStandalone class for driving the test in standalone mode"""
     def setUp(self):
         ''' Set up to run test as Standalone'''
         Tester.setup_standalone(self)
@@ -45,8 +45,8 @@ class TestCustomStandalone(unittest.TestCase):
         tester.test(self.test_ctxtype, self.test_config)
 
 
-# Example to run the same test in distributed mode
-class TestCustomDistributed(TestCustomStandalone):
+class TestMultiplyByDistributed(TestMultiplyByStandalone):
+    """Example to run the same test in distributed mode"""
     def setUp(self):
         Tester.setup_distributed(self)
 
