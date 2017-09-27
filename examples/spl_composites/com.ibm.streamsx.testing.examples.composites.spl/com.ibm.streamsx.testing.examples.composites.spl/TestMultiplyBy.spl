@@ -1,6 +1,6 @@
-namespace com.ibm.streamsx.testing.spl ;
+namespace com.ibm.streamsx.testing.examples.composites.spl ;
 
-use com.ibm.streamsx.testing.toolkit::*;
+use com.ibm.streamsx.testing.examples.composites::*;
 
 /** Composite for testing the SPL composite operator
  *  This composite generates the test data and feeds the data into the composite operator under test.

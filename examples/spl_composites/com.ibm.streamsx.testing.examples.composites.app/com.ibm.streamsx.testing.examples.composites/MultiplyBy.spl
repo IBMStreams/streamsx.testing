@@ -1,4 +1,4 @@
-namespace com.ibm.streamsx.testing.toolkit ;
+namespace com.ibm.streamsx.testing.examples.composites ;
 
 
 /** This is the business logic under test.  

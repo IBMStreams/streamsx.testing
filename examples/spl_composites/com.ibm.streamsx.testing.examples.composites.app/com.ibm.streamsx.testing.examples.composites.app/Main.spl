@@ -1,6 +1,6 @@
-namespace application ;
+namespace com.ibm.streamsx.testing.examples.composites.app ;
 
-use com.ibm.streamsx.testing.toolkit::* ;
+use com.ibm.streamsx.testing.examples.composites::* ;
 
 /** This main composite invokes the MultiplyBy composite operator.  
  *  This demonstrates how clients can set up their application to make
