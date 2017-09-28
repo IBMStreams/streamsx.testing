@@ -1,0 +1,41 @@
+namespace com.ibm.streamsx.testing.examples.operators.app ;
+
+use com.ibm.streamsx.testing.examples.composites::* ;
+
+/** This main composite invokes the MultiplyBy composite operator.  
+ *  This demonstrates how clients can set up their application to make
+ *  business logic more reusable and how automated unite tests can be done
+ *  for those business logic.
+ * 
+ */
+composite Main
+{
+	graph
+
+		(stream<int32 counter> Beacon_2_out0) as Beacon_2 = Beacon()
+		{
+			param
+				period : 1.0 ;
+			output
+				Beacon_2_out0 : counter =(int32) IterationCount() ;
+		}
+
+		(stream<int32 result> TestCustomOperator_1_out0) as TestCustomOperator_1 =
+			MultiplyBy(Beacon_2_out0)
+		{
+			param
+				factor : 3 ;
+		}
+
+		() as Custom_3 = Custom(TestCustomOperator_1_out0 as inputStream)
+		{
+			logic
+				onTuple inputStream :
+				{
+					printStringLn((rstring) inputStream) ;
+				}
+
+		}
+
+}
+

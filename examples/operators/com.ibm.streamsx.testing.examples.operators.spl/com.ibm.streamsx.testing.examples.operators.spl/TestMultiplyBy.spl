@@ -1,0 +1,33 @@
+namespace com.ibm.streamsx.testing.examples.operators.spl ;
+
+use com.ibm.streamsx.testing.examples.operators::*;
+
+/** Composite for testing the SPL composite operator
+ *  This composite generates the test data and feeds the data into the composite operator under test.
+ *  The result of the test run is submitted to the output port of the composite operator.
+ *  Clients are expected to use the Streams Java Application API or Streams Python Application API
+ *  to drive this test and validate the result of the test run.
+ */
+public composite TestMultiplyBy(output Out0)
+{
+	param
+		expression<int32> $factor;
+	graph
+		(stream<int32 result> Out0) as Custom_2 = MultiplyBy(Beacon_2_out0 as
+			inPort0Alias)
+		{
+			param
+				factor : $factor;
+		}
+
+		(stream<int32 counter> Beacon_2_out0 as O) as Beacon_2 = Beacon()
+		{
+			param
+				iterations : 34 ;
+				initDelay : 2.0 ;
+			output
+				O : counter = (int32) IterationCount() ;
+		}
+
+}
+

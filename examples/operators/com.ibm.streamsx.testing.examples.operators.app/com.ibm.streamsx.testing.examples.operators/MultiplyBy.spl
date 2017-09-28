@@ -1,0 +1,29 @@
+namespace com.ibm.streamsx.testing.examples.operators ;
+
+
+/** This is the business logic under test.  
+ *  This composite operator takes data from the input stream and multiply
+ *  its value by a factor specified as a parameter.
+ * 
+ *  @param factor the factor to multiply the data by
+ */
+public composite MultiplyBy(input In0 ; output Out1)
+{
+	param
+		expression<int32> $factor;
+	graph
+		(stream<int32 result> Out1) as Custom_2 = Custom(In0 as inPort0Alias)
+		{
+			logic
+				onTuple inPort0Alias :
+				{
+					mutable int32 returnNum = inPort0Alias.counter * $factor ;
+					submit({ result = returnNum }, Out1) ;
+				}
+
+		}
+
+}
+
+
+
