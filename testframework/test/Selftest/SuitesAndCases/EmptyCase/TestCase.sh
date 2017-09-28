@@ -1,11 +1,11 @@
 #--variantCount=4
 #--TTRO_casePrep:=copyAndModifyTestCollection
-#--TTRO_caseStep:=echo TT_runOptions='"${options\[${TTRO_caseVariant}\]}"' TT_expectResult=$errTestError runRunTTF myEvaluate
-##--TTRO_caseStep:=echo runRunTTF myEvaluate
+##--TTRO_caseStep:=echo TT_runOptions='"${options\[${TTRO_caseVariant}\]}"' TT_expectResult=$errTestError runRunTTF myEvaluate
+#--TTRO_caseStep:=runRunTTF myEvaluate
 
 declare -a options=( '' '-j 1' '-j 1 -v' '-j 1 -v -d' )
-#TT_runOptions="${options[${TTRO_caseVariant}]}"
-#TT_expectResult=$errTestError
+TT_runOptions="${options[${TTRO_caseVariant}]}"
+TT_expectResult=$errTestError
 
 #function getOptions {
 #	TT_runOptions="${options[$TTRO_caseVariant]}"
