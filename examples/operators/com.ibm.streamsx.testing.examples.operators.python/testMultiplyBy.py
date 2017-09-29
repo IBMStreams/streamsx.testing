@@ -24,23 +24,23 @@ class TestMultiplyByStandalone(unittest.TestCase):
         params = {'factor':3}
 
         ''' Call the test composite'''
-        testStream = op.Source(topo, 'com.ibm.streamsx.testing.examples.operators.spl::TestMultiplyBy', 'tuple<int32 result>', params=params)
+        test_op = op.Source(topo, 'com.ibm.streamsx.testing.examples.operators.spl::TestMultiplyBy', 'tuple<int32 result>', params=params)
 
         ''' Convert the SPLStream to Python Stream so we can work with the data in the tester '''
-        mapped = testStream.stream.map(lambda x: x['result'])
+        mapped = test_op.stream.map(lambda x: x['result'])
 
         ''' Set up Tester to validate the result of running the test composite'''
         tester = Tester(topo)
 
         ''' Example to check for tuple count'''
-        tester.tuple_count(testStream.stream, 34)
+        tester.tuple_count(test_op.stream, 34)
 
         ''' Example to check content of the stream with an expected list of data'''
         expected = list(np.arange(0, 100, 3))
         tester.contents(mapped, expected)
 
         ''' Example to check data tuple by tuple'''
-        tester.tuple_check(testStream.stream, lambda  x:(x['result']%3)==0)
+        tester.tuple_check(test_op.stream, lambda  x:(x['result']%3)==0)
 
         tester.test(self.test_ctxtype, self.test_config)
 
