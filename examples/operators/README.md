@@ -4,7 +4,7 @@ This example demonstrates using an SPL test composite to test an SPL operator. T
 
 ## Toolkit Under Test
 
-com.ibm.streamsx.testing.examples.operators.app is the toolkit under test.  The toolkit contains two operators:
+com.ibm.streamsx.testing.examples.operators is the toolkit under test.  The toolkit contains two operators:
 
 * com.ibm.streamsx.testing.examples.operators::MultiplyBy - This is the SPL composite under test.  This composite contains a single Custom operator.  The goal of the example is to test the logic of MultipliBy composite operator.  
 * com.ibm.streamsx.testing.examples.operators.app::Main - This is the main composite that uses the MultiplyBy composite operator.  
@@ -22,7 +22,7 @@ The advantages of having this SPL Test composite are:
 * It is easier to generate test data using Beacon and sending the data to the operator under test.  An alternative is to generate the test data in Java and Python.  But this makes the set up a bit more complicated as you have to cross language boundary.  It is easier to have data generation and the invocation of the operator in a single language.
 * The SPL Test Composite outputs the data from the test run, allowing us to use the Java Application API or Python Application API to access the data to verify the correct data is produced.
 
-In this example, the SPL test composite is stored in **com.ibm.streamsx.testing.examples.operator.spl** project.  
+In this example, the SPL test composite is stored in **com.ibm.streamsx.testing.examples.operator.testing** project.  
 
 ## Running the Test Composite
 

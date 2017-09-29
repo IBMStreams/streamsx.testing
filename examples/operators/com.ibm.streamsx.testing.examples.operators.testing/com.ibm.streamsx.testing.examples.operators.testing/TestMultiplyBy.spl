@@ -1,4 +1,4 @@
-namespace com.ibm.streamsx.testing.examples.operators.spl ;
+namespace com.ibm.streamsx.testing.examples.operators.testing ;
 
 use com.ibm.streamsx.testing.examples.operators::*;
 

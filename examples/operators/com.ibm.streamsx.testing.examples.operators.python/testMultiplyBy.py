@@ -13,8 +13,8 @@ class TestMultiplyByStandalone(unittest.TestCase):
         Tester.setup_standalone(self)
     def _add_toolkits(self, topo):
         ''' Add required toolkits for test to run '''
-        tk.add_toolkit(topo, '../com.ibm.streamsx.testing.examples.operators.app')
-        tk.add_toolkit(topo, '../com.ibm.streamsx.testing.examples.operators.spl')
+        tk.add_toolkit(topo, '../com.ibm.streamsx.testing.examples.operators')
+        tk.add_toolkit(topo, '../com.ibm.streamsx.testing.examples.operators.testing')
     def test_op(self):
         ''' Create topology to drive the test from com.ibm.streamsx.testing.spl '''
         topo = Topology()
@@ -24,7 +24,7 @@ class TestMultiplyByStandalone(unittest.TestCase):
         params = {'factor':3}
 
         ''' Call the test composite'''
-        test_op = op.Source(topo, 'com.ibm.streamsx.testing.examples.operators.spl::TestMultiplyBy', 'tuple<int32 result>', params=params)
+        test_op = op.Source(topo, 'com.ibm.streamsx.testing.examples.operators.testing::TestMultiplyBy', 'tuple<int32 result>', params=params)
 
         ''' Convert the SPLStream to Python Stream so we can work with the data in the tester '''
         mapped = test_op.stream.map(lambda x: x['result'])
