@@ -11,7 +11,7 @@ ADD link to step by step python setup for others.
 ### Overview
 Tests are run using the Streaming Anaytics service on IBM's Cloud platform. No local install of IBM Streams is required.
 
-_Note: use of the service for testing will contribute to service usage for billing purposes._
+_Note: use of the service for testing will contribute to usage for billing purposes._
 
 ### Setup
 
