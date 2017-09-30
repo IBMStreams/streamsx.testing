@@ -4,7 +4,7 @@ The Python package [streamsx](https://pypi.python.org/pypi/streamsx) contains a 
 
 An test application is built and conditions are placed against streams, e.g. this stream must contains 42 tuples or this stream must contain the tuples `A, B, C` in any order.
 
-The test application can invoke Python functions and/or SPL operators. A test may be against a single operator, e.g. verify that the `MultipleBy` operator correctly multiplies by the supplied `factor` (ADD LINK), a sub-graph or a complete application. With a complete application affects of the application on external systems may need to be tested (e.g. was a database updated), in this case standard `unittest` approaches for that external system may be used to verify correct outcomes.
+The test application can invoke Python callables and/or SPL operators. A test may be against a single operator, e.g. verify that the `MultipleBy` operator correctly multiplies by the supplied `factor` (ADD LINK), a sub-graph or a complete application. With a complete application affects of the application on external systems may need to be tested (e.g. was a database updated), in this case standard `unittest` approaches for that external system may be used to verify correct outcomes.
 
 The testing facility requires Python 3.5 and Streaming Analytics service or IBM Streams 4.2.
 ## Quick example
@@ -41,7 +41,7 @@ if this test was in the file `test_filter.py` then it could be run using:
 ```
 python3 -u -m unittest test_filter.py
 ```
-If the test module and/or class contains multiple tests (though multiple classes and/or methods) then the single test could be run as:
+If the test module and/or class contains multiple tests (through multiple classes and/or methods) then a single test could be run as:
 ```
 python3 -u -m unittest test_filter.TestSimpleFilter.test_filter
 ```
