@@ -1,4 +1,4 @@
-package com.ibm.streamsx.testing.examples.operators.java;
+package examples.operators.tests;
 
 import java.io.File;
 import java.util.HashMap;
