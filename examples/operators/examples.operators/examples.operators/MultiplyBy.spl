@@ -1,4 +1,4 @@
-namespace com.ibm.streamsx.testing.examples.operators ;
+namespace examples.operators ;
 
 
 /** This is the business logic under test.  

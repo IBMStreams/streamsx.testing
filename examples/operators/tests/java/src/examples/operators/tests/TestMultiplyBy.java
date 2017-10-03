@@ -1,4 +1,4 @@
-package com.ibm.streamsx.testing.examples.operators.java;
+package examples.operators.tests;
 
 import java.io.File;
 import java.util.HashMap;
@@ -35,8 +35,8 @@ public class TestMultiplyBy {
 		Topology topo = new Topology("TestMultiplyBy");
 				
 		// Add the toolkit under test to the toolkit path
-		SPL.addToolkit(topo, new File("../com.ibm.streamsx.testing.examples.operators.spl"));
-		SPL.addToolkit(topo, new File("../com.ibm.streamsx.testing.examples.operators.app"));
+		SPL.addToolkit(topo, new File("../../examples.operators"));
+		SPL.addToolkit(topo, new File("../examples.operators.testing"));
 		
 		// Get SPL Schema for test result
 		StreamSchema schema = Type.Factory.getStreamSchema("tuple<int32 result>");
@@ -46,7 +46,7 @@ public class TestMultiplyBy {
 		params.put("factor", 3);
 		
 		// Invoke the test composite
-		SPLStream resultStream = SPL.invokeSource(topo, "com.ibm.streamsx.testing.examples.operators.spl::TestMultiplyBy", params, schema);
+		SPLStream resultStream = SPL.invokeSource(topo, "examples.operators.testing::TestMultiplyBy", params, schema);
 		
 		// Convert the SPL Stream to TStream so we can work with it with the tester
 		TStream<Integer> tStream = resultStream.convert(t->{
