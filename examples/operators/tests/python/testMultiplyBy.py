@@ -14,7 +14,7 @@ class TestMultiplyByStandalone(unittest.TestCase):
     def _add_toolkits(self, topo):
         ''' Add required toolkits for test to run '''
         tk.add_toolkit(topo, '../../examples.operators')
-        tk.add_toolkit(topo, '../../examples.operators.testing')
+        tk.add_toolkit(topo, '../examples.operators.testing')
     def test_op(self):
         ''' Create topology to drive the test from com.ibm.streamsx.testing.spl '''
         topo = Topology()

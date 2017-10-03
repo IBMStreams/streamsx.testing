@@ -22,7 +22,7 @@ The advantages of having this SPL Test composite are:
 * It is easier to generate test data using Beacon and sending the data to the operator under test.  An alternative is to generate the test data in Java and Python.  But this makes the set up a bit more complicated as you have to cross language boundary.  It is easier to have data generation and the invocation of the operator in a single language.
 * The SPL Test Composite outputs the data from the test run, allowing us to use the Java Application API or Python Application API to access the data to verify the correct data is produced.
 
-In this example, the SPL test composite is stored in **examples.operator.testing** project.  
+In this example, the SPL test composite is stored in **examples.operator.testing** toolkit.  
 
 ## Running the Test Composite
 
