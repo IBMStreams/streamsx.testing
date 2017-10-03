@@ -1,4 +1,4 @@
-namespace com.ibm.streamsx.testing.examples.operators.app ;
+namespace examples.operators.app ;
 
 use com.ibm.streamsx.testing.examples.composites::* ;
 
