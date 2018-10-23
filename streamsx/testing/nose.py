@@ -44,7 +44,7 @@ class _JobConfigAction(object):
         self._jco = jco
 
     def __str__(self):
-        return '_JobConfigAction(' + str(self._jco) + ')'
+        return JobConfigPlugin.name + '(' + str(self._jco) + ')'
 
     def __call__(self, tester, test, ctxtype, config):
         if ContextTypes.STANDALONE == ctxtype:
@@ -55,6 +55,7 @@ class _JobConfigAction(object):
                 jc.raw_overlay = self._jco
             else:
                 jc.raw_overlay.update(self._jco)
+            jc.add(config)
         else:
             jc = JobConfig()
             jc.raw_overlay = self._jco
@@ -70,14 +71,15 @@ class SkipStandalonePlugin(_TesterPlugin):
 
     def beforeTest(self, test):
         if self.enabled:
-            self._add_action(test, _SkipAction(ContextTypes.STANDALONE))
+            self._add_action(test, _SkipAction(SkipStandalonePlugin.name, ContextTypes.STANDALONE))
 
 class _SkipAction(object):
-    def __init__(self, type_):
+    def __init__(self, name, type_):
+        self._name = name
         self._type = type_
 
     def __str__(self):
-        return 'SkipAction(' + self._type + ')'
+        return self._name
 
     def __call__(self, tester, test, ctxtype, config):
         if self._type == ctxtype:
