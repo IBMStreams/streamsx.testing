@@ -3,7 +3,7 @@ setup(
   name = 'streamsx.testing',
   packages = ['streamsx.testing'],
   include_package_data=True,
-  version = '0.1.1',
+  version = '0.1.2',
   description = 'IBM Streams tester',
   long_description = open('DESC.txt').read(),
   author = 'IBM Streams @ github.com',
