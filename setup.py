@@ -10,7 +10,7 @@ setup(
   author_email = 'debrunne@us.ibm.com',
   license='Apache License - Version 2.0',
   url = 'https://github.com/IBMStreams/streamsx.testing',
-  keywords = ['streams', 'ibmstreams', 'streaming', 'analytics', 'streaming-analytics'],
+  keywords = ['streams', 'ibmstreams', 'streaming', 'analytics', 'streaming-analytics', 'testing'],
   classifiers = [
     'Development Status :: 3 - Alpha',
     'License :: OSI Approved :: Apache Software License',
