@@ -17,7 +17,7 @@ setup(
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
   ],
-  #install_requires=['streamsx==1.11.2a', 'nose'],
+  install_requires=['streamsx>=1.11.5a', 'nose'],
   entry_points = {
     'nose.plugins.0.10': [
     'streamsx-jco = streamsx.testing.nose:JobConfigPlugin',
