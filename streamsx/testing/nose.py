@@ -28,10 +28,7 @@ class JobConfigPlugin(_TesterPlugin):
 
     These options are supported:
 
-        * ``--streamsx-jco-default-tag=tag`` - Sets the resource tag for the
-            default host pool. The default host pool is where
-            transformations/operators with explicit resource tags are
-            assigned to and by default maps to the resource tag ``application``.
+        * ``--streamsx-jco-default-tag=tag`` - Sets the resource tag for the default host pool. The default host pool is where transformations/operators with explicit resource tags are assigned to and by default maps to the resource tag ``application``.
     """
     name = 'streamsx-jco'
     score = 2000
