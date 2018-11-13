@@ -9,9 +9,6 @@ class TestRunTests(TestCase):
         Tester.setup_standalone(self)
      
     def test_simple_app(self):
-        topo = Topology()
-        s = topo.source([1,2,4])
-
         tester = Tester(topo)
         tester.contents(s, [1,2,4])
         tester.tuple_count(s, 3)

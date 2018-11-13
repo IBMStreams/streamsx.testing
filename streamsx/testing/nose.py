@@ -85,5 +85,27 @@ class _SkipAction(object):
         if self._type == ctxtype:
             test.skipTest('streamsx-skip-standlone enabled')
 
+class DisableSSLVerifyPlugin(_TesterPlugin):
+    name = 'streamsx-disable-ssl-verify'
+    score = 1901
 
+    def configure(self, options, conf):
+        super(DisableSSLVerifyPlugin, self).configure(options, conf)
+        self.enabled = options.enable_plugin_streamsx_disable_ssl_verify
 
+    def beforeTest(self, test):
+        if self.enabled:
+            self._add_action(test, _AddConfigAction(ContextTypes.DISTRIBUTED,
+                {ConfigParams.SSL_VERIFY:False}))
+
+class _AddConfigAction(object):
+    def __init__(self, ctxtype, kvs):
+        self._ctxtype = ctxtype
+        self._kvs = kvs
+
+    def __str__(self):
+        return 'Context:' + str(self._ctxtype) + ' Configs:' + str(self._kvs)
+
+    def __call__(self, tester, test, ctxtype, config):
+        if self._ctxtype == ctxtype:
+            config.update(self._kvs)
