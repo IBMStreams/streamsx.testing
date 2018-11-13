@@ -1,3 +1,7 @@
+"""
+Nose plugins for IBM Streams application testing.
+"""
+
 import nose.plugins.base
 import os
 
@@ -15,6 +19,20 @@ class _TesterPlugin(nose.plugins.base.Plugin):
 
 
 class JobConfigPlugin(_TesterPlugin):
+    """Job configuration plugin.
+
+    Plugin that modifies the job configuration object for
+    the application under test.
+
+    Enabled with ``--with-streamsx-jco``.
+
+    These options are supported:
+
+        * ``--streamsx-jco-default-tag=tag`` - Sets the resource tag for the
+            default host pool. The default host pool is where
+            transformations/operators with explicit resource tags are
+            assigned to and by default maps to the resource tag ``application``.
+    """
     name = 'streamsx-jco'
     score = 2000
 
@@ -62,6 +80,13 @@ class _JobConfigAction(object):
             jc.add(config)
 
 class SkipStandalonePlugin(_TesterPlugin):
+    """Skip standalone tests.
+
+    Automatically skips any tests that have been configured for
+    standalone using ``Tester.setup_standalone()``.
+
+    Enabled with ``--with-streamsx-skip-standalone``.
+    """
     name = 'streamsx-skip-standalone'
     score = 1900
 
@@ -86,6 +111,14 @@ class _SkipAction(object):
             test.skipTest('streamsx-skip-standlone enabled')
 
 class DisableSSLVerifyPlugin(_TesterPlugin):
+    """Disable SSL certification verification.
+
+    Disables SSL certification when running distributed tests.
+    This is useful when a test instance with a self-signed certificate,
+    such as the IBM Streams Quick Start edition.
+
+    Enabled with ``--with-streamsx-disable-ssl-verify``.
+    """
     name = 'streamsx-disable-ssl-verify'
     score = 1901
 
