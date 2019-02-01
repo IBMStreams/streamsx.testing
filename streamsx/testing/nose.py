@@ -128,6 +128,54 @@ class DisableSSLVerifyPlugin(_TesterPlugin):
             self._add_action(test, _AddConfigAction(ContextTypes.DISTRIBUTED,
                 {ConfigParams.SSL_VERIFY:False}))
 
+class AddConfigurationPlugin(_TesterPlugin):
+    """Add arbitrary configuration to a test
+
+    Enabled with ``--with-streamsx-add-config``.
+
+    This plugin adds arbitrary configuration items to a test's
+    ``test_config`` dictionary by updating with the dictionary value supplied
+    by the options.
+    
+
+    These options must be set when using this plugin.
+
+        * ``--streamsx-test-context CONTEXT`` - Context that will have its configuration added to. Any test that runs with a different context will not have its 
+        * ``--streamsx-test-config CODE`` - Code that is executed using built-in method `exec`. The execution must set the local variable ``cfg`` to a dictionary that will then be used as ``test.test_config.update(cfg)`` before the test is run.
+
+    Example::
+
+        nosetests --with-streamsx-add-config --streamsx-test-context STANDALONE --streamsx-test-config "cfg = {'topology.keepArtifacts':True}"
+
+    """
+    name = 'streamsx-add-config'
+    score = 1902
+
+    def options(self, parser, env=os.environ):
+        super(AddConfigurationPlugin, self).options(parser, env=env)
+        parser.add_option("--streamsx-test-context", action="store",
+            dest="streamsx_test_context",
+            default=env.get('STREAMSX_TEST_CONTEXT'),
+            help="Context type to add configuration to [STREAMSX_TEST_CONTEXT]")
+        parser.add_option("--streamsx-test-config", action="store",
+            dest="streamsx_test_config",
+            default=env.get('STREAMSX_TEST_CONFIG'),
+            help="Additional configuration to be added to test configuration [STREAMSX_TEST_CONFIG]")
+
+    def configure(self, options, conf):
+        super(AddConfigurationPlugin, self).configure(options, conf)
+        self.enabled = options.enable_plugin_streamsx_add_config
+        if self.enabled:
+            self._add_ctx = options.streamsx_test_context
+            exec_locals = {}
+            exec(options.streamsx_test_config, globals(), exec_locals)
+            self._add_cfg = {}
+            self._add_cfg.update(exec_locals['cfg'])
+ 
+    def beforeTest(self, test):
+        if self.enabled and self._add_ctx and self._add_cfg:
+            self._add_action(test, _AddConfigAction(self._add_ctx, self._add_cfg))
+
 class _AddConfigAction(object):
     def __init__(self, ctxtype, kvs):
         self._ctxtype = ctxtype

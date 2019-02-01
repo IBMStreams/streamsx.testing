@@ -3,7 +3,7 @@ setup(
   name = 'streamsx.testing',
   packages = ['streamsx.testing'],
   include_package_data=True,
-  version = '0.2.2',
+  version = '0.3.0',
   description = 'IBM Streams tester',
   long_description = open('DESC.txt').read(),
   author = 'IBM Streams @ github.com',
@@ -17,9 +17,10 @@ setup(
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
   ],
-  install_requires=['streamsx>=1.11.5a', 'nose'],
+  install_requires=['streamsx>=1.11.8', 'nose'],
   entry_points = {
     'nose.plugins.0.10': [
+    'streamsx-add-config = streamsx.testing.nose:AddConfigurationPlugin',
     'streamsx-jco = streamsx.testing.nose:JobConfigPlugin',
     'streamsx-skip-standalone = streamsx.testing.nose:SkipStandalonePlugin',
     'streamsx-disable-ssl-verify = streamsx.testing.nose:DisableSSLVerifyPlugin'
