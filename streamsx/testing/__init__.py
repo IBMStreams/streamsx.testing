@@ -38,10 +38,10 @@ A :py:class:`Tester` instance is created and associated with the ``Topology`` to
 Conditions are then created against streams, such as a stream must receive 10 tuples using
 :py:meth:`~Tester.tuple_count`.
 
-Here is a simple example that tests a filter correctly only passes tuples with values greater than 5::
+Here is a simple example that tests a filter correctly passes tuples with values greater than 5::
 
     import unittest
-    from streamsx.tester import Tester
+    from streamsx.testing import Tester
     from streamsx.topology.topology import Topology
 
     class TestSimpleFilter(unittest.TestCase):
@@ -62,7 +62,7 @@ Here is a simple example that tests a filter correctly only passes tuples with v
 
             # Submit the application for test
             # If it fails an AssertionError will be raised.
-           tester.test(self.test_ctxtype, self.test_config)
+            tester.test(self.test_ctxtype, self.test_config)
 
 
 A stream may have any number of conditions and any number of streams may be tested.
