@@ -95,5 +95,7 @@ between tuples are within the timeout period the test remains running until ten 
 .. note:: :py:class:`Tester` is an import of `streamsx.topology.tester.Tester`.
 """
 
-__all__ = ['Tester']
+__all__ = ['Tester', 'FnTester']
 from streamsx.topology.tester import Tester
+from streamsx.testing._fn import _FnTester
+FnTester=_FnTester
