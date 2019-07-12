@@ -11,10 +11,10 @@ class TestFunctions(unittest.TestCase):
         tester = FnTester('spl.math::abs')
 
         args = [1,2,-3,0,-5]
-        tester.series(args, [abs(i) for i in args])
+        tester.series(args, [abs(i) for i in args], name='abs_int64')
 
         args = [0.5, 0.0, -4.5]
-        tester.series(args, [abs(i) for i in args])
+        tester.series(args, [abs(i) for i in args], name='abs_float64')
 
         tester.test(self)
 
@@ -26,3 +26,9 @@ class TestFunctions(unittest.TestCase):
         tester.series(args, ['AB', 'CD'])
 
         tester.test(self)
+
+
+class TestSasFunctions(TestFunctions):
+    def setUp(self):
+        # Sets self.test_ctxtype and self.test_config
+        Tester.setup_streaming_analytics(self)

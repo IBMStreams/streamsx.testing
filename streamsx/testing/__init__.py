@@ -12,7 +12,10 @@ Testing of an application, sub-graph or operator is performed
 by building a Python topology that invokes the element under test
 in a standard Python unittest. The element under test can be
 a SPL application, sub-graph, operator or a Python application,
-sub-graph or single transformation.
+sub-graph or single transformation. See :ref:`sxt-testing-overview`.
+
+Testing of SPL functions is performed by declaring series of
+input data and expected output. See :ref:`sxt-fn-testing-overview`.
 
 Python is a natural choice for testing of SPL applications as
 tests can be written simply and executed immediately without
@@ -20,8 +23,10 @@ a compilation step. By use of the standard Python unittest existing
 tools such as ``nosetets`` can be used to run tests, produce reports
 and integrate with continuous integration tools such as Jenkins.
 
+.. _sxt-testing-overview:
+
 ****************
-Testing Overview
+Testing overview
 ****************
 
 Allows testing of a streaming application by creation conditions
@@ -93,9 +98,24 @@ between tuples are within the timeout period the test remains running until ten 
 .. note:: The submitted job (application under test) has additional elements (streams & operators) inserted to implement the conditions. These are visible through various APIs including the Streams console raw graph view. Such elements are put into the `Tester` category.
 
 .. note:: :py:class:`Tester` is an import of `streamsx.topology.tester.Tester`.
+
+.. _sxt-fn-testing-overview:
+
+*****************************
+SPL function testing overview
+*****************************
+
+SPL functions can tested using :py:class:`FnTester` by providing series
+of input values and the expected function return values.
+Functions under test may be SPL or SPL native functions
+(implemented in Java or C++).
+
+
 """
 
+__version__='0.3.1'
+
 __all__ = ['Tester', 'FnTester']
+
 from streamsx.topology.tester import Tester
-from streamsx.testing._fn import _FnTester
-FnTester=_FnTester
+from streamsx.testing._fn import FnTester

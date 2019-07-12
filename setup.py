@@ -1,9 +1,10 @@
 from setuptools import setup
+import streamsx.testing
 setup(
   name = 'streamsx.testing',
   packages = ['streamsx.testing'],
   include_package_data=True,
-  version = '0.3.0',
+  version = streamsx.testing.__version__,
   description = 'IBM Streams tester',
   long_description = open('DESC.txt').read(),
   author = 'IBM Streams @ github.com',
